@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contact Finder</title>
+    <link rel="stylesheet" href="./stlye.css" />
+  </head>
+  <body>
+    <div class="header">
+      <img src="./icons/icon32.png" >
+      WhatsApp Group Member Extraction
+    </div>
+    <div class="radio-group">
+      <div class="select_description">
+        <img src="./image/bell.png" alt="" width="20px">
+         Select the format you want to output to.
+      </div>
+      <div class="select">
+        <div>
+          <input type="radio" name="format" value="excel" checked />
+           Excel
+        </div>
+        <br />
+        <div>
+          <input type="radio" name="format" value="json" />
+           JSON
+        </div>
+        <br />
+        <div>
+          <input type="radio" name="format" value="csv" />
+           CSV
+        </div>
+      </div>
+    </div>
+    <div>
+      <button id="scrape-btn">Download Group Members</button>
+    </div>
+    <div id="sticky-alert"></div>
+    <script src="popup.js"></script>
+  </body>
+</html>

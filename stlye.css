@@ -1,0 +1,57 @@
+body {
+    width: 300px;
+    font-family: Arial, sans-serif;
+}
+
+.header {
+    text-align: left;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    justify-items: center;
+    gap: 5px;
+    border: 1px solid #45a049;
+    padding: 5px;
+    border-radius: 5px;
+    background-color: #d9fdd3;
+}
+
+.radio-group {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.select_description {
+    font-size: 15px;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    color: red;
+}
+
+.select {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    width: 100%;
+    gap: 10px;
+}
+
+button {
+    width: 100%;
+    padding: 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: 0.3s;
+    border-radius: 10px;
+}
+button:hover {
+    background-color: #45a049;
+}
+button:active {
+    transform: scale(0.99);
+}
