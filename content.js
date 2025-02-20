@@ -1,3 +1,24 @@
+
+
+const showNotification = (message) => {
+  const notification = document.createElement('div');
+  notification.className = 'notification';
+  notification.textContent = message;
+
+  document.body.appendChild(notification);
+
+  setTimeout(() => {
+    notification.classList.add('show');
+  }, 10);
+
+  setTimeout(() => {
+    notification.classList.remove('show');
+    setTimeout(() => {
+      document.body.removeChild(notification);
+    }, 500);
+  }, 3000);
+}
+
 class ContactFinder {
   #db;
   #chatToFind;
@@ -5,6 +26,7 @@ class ContactFinder {
   #chatsCol = "chat";
   #contactCol = "contact";
   #groupCol = "participant";
+  #groupMetaData = "group-metadata";
 
   constructor() {
     this.#chatToFind = this.#getGroupName();
@@ -12,13 +34,15 @@ class ContactFinder {
 
   #getGroupName() {
     const groupNameNode = document.evaluate(
-      "/html/body/div[1]/div/div/div[2]/div[4]/div/header/div[2]/div[1]/div/span/text()",
+      "/html/body/div[1]/div/div/div[3]/div/div[4]/div/header/div[2]/div[1]/div/span/text()",
       document,
       null,
       XPathResult.STRING_TYPE,
       null
     );
-    return groupNameNode.stringValue || "Unknown Group";
+    const groupName = groupNameNode.stringValue || "Unknown Group";
+    console.log("Extracted Group Name:", groupName);
+    return groupName;
   }
 
   async openConnection() {
@@ -26,6 +50,23 @@ class ContactFinder {
       const dbName = this.#dbName;
       this.#db = await new Promise((resolve, reject) => {
         let request = indexedDB.open(dbName);
+
+        request.onupgradeneeded = (event) => {
+          const db = event.target.result;
+          if (!db.objectStoreNames.contains(this.#chatsCol)) {
+            db.createObjectStore(this.#chatsCol, { keyPath: "id" });
+          }
+          if (!db.objectStoreNames.contains(this.#contactCol)) {
+            db.createObjectStore(this.#contactCol, { keyPath: "id" });
+          }
+          if (!db.objectStoreNames.contains(this.#groupCol)) {
+            db.createObjectStore(this.#groupCol, { keyPath: "groupId" });
+          }
+          if (!db.objectStoreNames.contains(this.#groupMetaData)) {
+            db.createObjectStore(this.#groupMetaData, { keyPath: "id" });
+          }
+        };
+
         request.onerror = (event) => {
           reject(event);
         };
@@ -56,15 +97,22 @@ class ContactFinder {
 
   async #getChats() {
     const allChats = await this.#promisifyCol(this.#chatsCol);
+    const allGroupMetaData = await this.#promisifyCol(this.#groupMetaData);
     const chatToFind = this.#chatToFind;
-    return allChats.filter((chat) => {
-      return chat.name && chat.name.includes(chatToFind);
+    console.log("Full Group Meta Data:", allGroupMetaData);
+    console.log("Full Chat Data:", allChats);
+    console.log("Chat to Find:", chatToFind);
+
+    return allGroupMetaData.filter((chat) => {
+      return (chat.subject && chat.subject.includes(chatToFind));
     });
   }
 
   async #getGroups() {
     const chats = (await this.#getChats()).map((chat) => chat.id);
+    console.log("Filtered Chat IDs:", chats);
     const allGroups = await this.#promisifyCol(this.#groupCol);
+    console.log("All Groups:", allGroups);
     return allGroups.filter((group) => {
       return group.groupId && chats.includes(group.groupId);
     });
@@ -72,6 +120,7 @@ class ContactFinder {
 
   async #getGroupParticipants() {
     const groups = await this.#getGroups();
+    console.log("Filtered Groups:", groups);
     const map = new Map();
 
     groups.forEach((group) => {
@@ -81,6 +130,7 @@ class ContactFinder {
       });
     });
 
+    console.log("Group Participants Map:", map);
     return map;
   }
 
@@ -91,7 +141,9 @@ class ContactFinder {
   async getGroupMembers() {
     const members = await this.#getGroupParticipants();
     const contacts = await this.#getContacts();
-
+    console.log(contacts);
+    console.log(members);
+    
     contacts.forEach((contact) => {
       var num;
       if (contact.phoneNumber) {
@@ -112,9 +164,10 @@ class ContactFinder {
 
   async downloadMembersAsJSON() {
     const members = await this.getGroupMembers();
-  
+    console.log(members);
+    
     if (!members || members.size === 0) {
-      alert("The current group is not selected or the group is not accessible.");
+      showNotification("The current group is not selected or the group is not accessible.");
       return;
     }
   
@@ -146,11 +199,11 @@ class ContactFinder {
     const members = await this.getGroupMembers();
   
     if (!members || members.size === 0) {
-      alert("The current group is not selected or the group is not accessible.");
+      showNotification("The current group is not selected or the group is not accessible.");
       return;
     }
   
-    let csvData = "Phone,Name,Push Name,Group Name\n"; // CSV header
+    let csvData = "Phone,Name,Push Name,Group Name\n";
   
     for (const [key, value] of members.entries()) {
       const row = [
@@ -158,8 +211,8 @@ class ContactFinder {
         value.name || "",
         value.pushname || "",
         this.#chatToFind || "",
-      ].join(","); // Join row data
-      csvData += row + "\n"; // Add row to CSV data
+      ].join(",");
+      csvData += row + "\n";
     }
   
     const blob = new Blob([csvData], { type: "text/csv" });
@@ -177,12 +230,12 @@ class ContactFinder {
     const members = await this.getGroupMembers();
   
     if (!members || members.size === 0) {
-      alert("The current group is not selected or the group is not accessible.");
+      showNotification("The current group is not selected or the group is not accessible.");
       return;
     }
   
     let excelData = [];
-    excelData.push(["Phone", "Name", "Push Name", "Group Name"]); // Excel header
+    excelData.push(["Phone", "Name", "Push Name", "Group Name"]);
   
     for (const [key, value] of members.entries()) {
       const row = [
@@ -203,5 +256,4 @@ class ContactFinder {
   }
 }
 
-// Execute the script
 const contactFinder = new ContactFinder();
