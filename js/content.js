@@ -1,23 +1,51 @@
+const style = document.createElement("style");
+style.textContent = `
+  .notification {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    color: white;
+    padding: 16px;
+    border-radius: 4px;
+    z-index: 100000;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+  }
 
+  .notification.show {
+    opacity: 1;
+  }
 
-const showNotification = (message) => {
-  const notification = document.createElement('div');
-  notification.className = 'notification';
+  .notification.warning {
+    background-color: #f44336; /* Red */
+  }
+
+  .notification.success {
+    background-color: #4CAF50; /* Green */
+  }
+`;
+
+document.head.appendChild(style);
+
+const showNotification = (message, type = "success") => {
+  const notification = document.createElement("div");
+  notification.className = `notification ${type}`;
   notification.textContent = message;
 
   document.body.appendChild(notification);
 
   setTimeout(() => {
-    notification.classList.add('show');
+    notification.classList.add("show");
   }, 10);
 
   setTimeout(() => {
-    notification.classList.remove('show');
+    notification.classList.remove("show");
     setTimeout(() => {
       document.body.removeChild(notification);
     }, 500);
   }, 3000);
-}
+};
 
 class ContactFinder {
   #db;
@@ -104,7 +132,7 @@ class ContactFinder {
     console.log("Chat to Find:", chatToFind);
 
     return allGroupMetaData.filter((chat) => {
-      return (chat.subject && chat.subject.includes(chatToFind));
+      return chat.subject && chat.subject.includes(chatToFind);
     });
   }
 
@@ -143,7 +171,7 @@ class ContactFinder {
     const contacts = await this.#getContacts();
     console.log(contacts);
     console.log(members);
-    
+
     contacts.forEach((contact) => {
       var num;
       if (contact.phoneNumber) {
@@ -164,15 +192,16 @@ class ContactFinder {
 
   async downloadMembersAsJSON() {
     const members = await this.getGroupMembers();
-    console.log(members);
-    
+
     if (!members || members.size === 0) {
-      showNotification("The current group is not selected or the group is not accessible.");
+      showNotification(
+        "The current group is not selected or the group is not accessible."
+      );
       return;
     }
-  
+
     let memberArray = [];
-  
+
     for (const [key, value] of members.entries()) {
       const memberData = {
         phone: value.phoneNum || "",
@@ -182,29 +211,33 @@ class ContactFinder {
       };
       memberArray.push(memberData);
     }
-  
+
     const jsonContent = JSON.stringify(memberArray, null, 2);
     const blob = new Blob([jsonContent], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const fileName = `${this.#chatToFind}.json`;
-  
+
     var link = document.createElement("a");
     link.setAttribute("href", url);
     link.setAttribute("download", fileName);
     document.body.appendChild(link);
     link.click();
+
+    showNotification("JSON download was successful.");
   }
 
   async downloadMembersAsCSV() {
     const members = await this.getGroupMembers();
-  
+
     if (!members || members.size === 0) {
-      showNotification("The current group is not selected or the group is not accessible.");
+      showNotification(
+        "The current group is not selected or the group is not accessible."
+      );
       return;
     }
-  
+
     let csvData = "Phone,Name,Push Name,Group Name\n";
-  
+
     for (const [key, value] of members.entries()) {
       const row = [
         value.phoneNum || "",
@@ -214,29 +247,33 @@ class ContactFinder {
       ].join(",");
       csvData += row + "\n";
     }
-  
+
     const blob = new Blob([csvData], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const fileName = `${this.#chatToFind}.csv`;
-  
+
     var link = document.createElement("a");
     link.setAttribute("href", url);
     link.setAttribute("download", fileName);
     document.body.appendChild(link);
     link.click();
+
+    showNotification("CSV download was successful.");
   }
 
   async downloadMembersAsExcel() {
     const members = await this.getGroupMembers();
-  
+
     if (!members || members.size === 0) {
-      showNotification("The current group is not selected or the group is not accessible.");
+      showNotification(
+        "The current group is not selected or the group is not accessible."
+      );
       return;
     }
-  
+
     let excelData = [];
     excelData.push(["Phone", "Name", "Push Name", "Group Name"]);
-  
+
     for (const [key, value] of members.entries()) {
       const row = [
         value.phoneNum || "",
@@ -246,13 +283,15 @@ class ContactFinder {
       ];
       excelData.push(row);
     }
-  
+
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.aoa_to_sheet(excelData);
     XLSX.utils.book_append_sheet(wb, ws, this.#chatToFind || "Group Data");
-  
+
     const fileName = `${this.#chatToFind}.xlsx`;
     XLSX.writeFile(wb, fileName);
+
+    showNotification("Excel download was successful.");
   }
 }
 

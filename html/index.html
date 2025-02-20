@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contact Finder</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../style/stlye.css" />
+  </head>
+  <body>
+    <div class="header">
+      <img src="../icons/icon32.png" alt="App Icon" width="32px" />
+      WhatsApp Group Member Extraction
+    </div>
+    <div class="help-section">
+      <h3>Help</h3>
+      <p>
+        * To use this tool, first select the group you want to extract members
+        from.
+      </p>
+      <p>
+        * Then, choose the desired output format (Excel, JSON, or CSV) and click
+        the "Download Group Members" button.
+      </p>
+    </div>
+    <div class="radio-group">
+      <div class="select_description">
+        <img src="../image/bell.png" alt="Notification Icon" width="20px" />
+        Select the format you want to output to.
+      </div>
+      <div class="select">
+        <div>
+          <input type="radio" name="format" value="excel" checked />
+          Excel
+        </div>
+        <div>
+          <input type="radio" name="format" value="json" />
+          JSON
+        </div>
+        <div>
+          <input type="radio" name="format" value="csv" />
+          CSV
+        </div>
+      </div>
+    </div>
+    <div>
+      <button id="scrape-btn">Download Group Members</button>
+    </div>
+    <div class="footer">
+      <p>
+        © 2025 Made with ❤️ by
+        <a href="https://github.com/wizard-dev-007" target="_blank">Wizard</a>
+      </p>
+      <img
+        src="https://avatars.githubusercontent.com/u/177471854?u=f3197b31074e4d62e83b4150b69fa385b9d6024c&v=4&size=80"
+        alt=""
+        srcset=""
+        width="20px"
+      />
+    </div>
+    <div id="sticky-alert"></div>
+    <script src="../js/popup.js"></script>
+  </body>
+</html>
